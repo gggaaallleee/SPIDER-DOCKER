@@ -12,7 +12,7 @@ const detectWebsites = process.env.DETECT_WEBSITES?.split(',') || [];
 const maxConcurrency = parseInt(process.env.MAX_CONCURRENCY || '10', 10);
 
 export const search = async (req: Request, res: Response): Promise<void> => {
-  const { query, pageCount = 10, needDetails = 'false', engine = 'baidu' } = req.query;
+  const { query, pageCount = 10, needDetails = 'false', engine = 'baidu', categories = 'general' } = req.query;
   const needDetailsBool = (needDetails === 'true');
 
   if (!query) {
@@ -25,28 +25,27 @@ export const search = async (req: Request, res: Response): Promise<void> => {
     });
     return;
   }
-
   let fetchSearchResults;
   let searchUrlBase;
   try {
-    if (engine === 'baidu') {
-      fetchSearchResults = fetchBaiduResults;
-      searchUrlBase = process.env.ENGINE_BAIDUURL;
-    } else if (engine === 'searchxng') {
-      fetchSearchResults = fetchSearchxngResults;
-      searchUrlBase = process.env.ENGINE_SEARCHXNGURL;
-    } else {
-      res.status(400).json({
-        status: 400,
-        error: {
-          code: "INVALID_ENGINE",
-          message: "无效的搜索引擎"
-        }
-      });
-      return;
-    }
+      if (engine === 'baidu') {
+        fetchSearchResults = fetchBaiduResults;
+        searchUrlBase = process.env.ENGINE_BAIDUURL;
+      } else if (engine === 'searchxng') {
+        fetchSearchResults = fetchSearchxngResults;
+        searchUrlBase = process.env.ENGINE_SEARCHXNGURL;
+      } else {
+        res.status(400).json({
+          status: 400,
+          error: {
+            code: "INVALID_ENGINE",
+            message: "无效的搜索引擎"
+          }
+        });
+        return;
+      }
 
-    const { resultUrls, results } = await fetchSearchResults(query as string, Number(pageCount), searchUrlBase || '');
+    const { resultUrls, results } = await fetchSearchResults(query as string, Number(pageCount), searchUrlBase || '', categories as string);
 
     //如果返回值为空，返回空数组
     if (results.size === 0) {
@@ -76,18 +75,12 @@ export const search = async (req: Request, res: Response): Promise<void> => {
     } else {
       console.log('Need details is true');
 
-      /*const clusterInstance = await Cluster.launch({
-        concurrency: Cluster.CONCURRENCY_CONTEXT,
-        maxConcurrency: maxConcurrency,
-        puppeteerOptions: { ignoreDefaultArgs: ["--enable-automation"], headless: true, pipe: true, args: ['--no-sandbox', '--disable-setuid-sandbox', '--disable-dev-shm-usage'] }
-      });*/
-
       const clusterInstance = await Cluster.launch({
         concurrency: Cluster.CONCURRENCY_CONTEXT,
         maxConcurrency: maxConcurrency,
         puppeteerOptions: {
           ignoreDefaultArgs: ["--enable-automation"],
-          headless: "true",  
+          headless: "true",
           executablePath: "/usr/bin/chromium",  // 明确指定 Chromium 路径
           pipe: true,
           args: [
@@ -95,7 +88,6 @@ export const search = async (req: Request, res: Response): Promise<void> => {
             '--disable-setuid-sandbox',
             '--disable-dev-shm-usage',
             '--disable-gpu',
-           // '--single-process' 
           ]
         }
       });

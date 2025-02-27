@@ -1,5 +1,4 @@
 FROM node:20.10.0-slim
-# 推荐使用 slim 镜像减少体积
 
 WORKDIR /app
 
@@ -41,9 +40,7 @@ RUN apt-get update && apt-get install -y \
     lsb-release \
     wget \
     xdg-utils \
-    # 安装 Chromium
     chromium \
-    # 清理缓存
     && rm -rf /var/lib/apt/lists/*
     
 # 安装中文字体
@@ -54,7 +51,7 @@ COPY SPIDER/. .
 RUN test -f package.json || (echo "package.json missing" && exit 1)
 RUN test -f .env || (echo ".env file missing in SPIDER directory" && exit 1)
 
-RUN npm install && npm run build
+RUN npm run build
 
 EXPOSE 3000
 CMD ["npm", "start"]

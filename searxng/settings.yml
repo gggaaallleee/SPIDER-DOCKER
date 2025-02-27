@@ -7,11 +7,21 @@ server:
   image_proxy: true
 ui:
   static_use_hash: true
+  # 启用 cn 分类
+  enabled_categories: [cn, general, images]  # 按需添加其他分类
+  # 或者定义分类显示顺序
+  categories_order: [cn, general, images]
 redis:
   url: redis://redis:6379/0
 engines:
     - name: bing
       disabled: false
+      categories: cn
+    #- name: bilibili
+     # engine: bilibili
+     # shortcut: bil
+     # disabled: false
+     # categories: cn
     - name : baidu
       engine : json_engine
       paging : True
@@ -20,7 +30,8 @@ engines:
       url_query : url
       title_query : title
       content_query : abs
-      categories : general
+      categories : cn
+
 search:
     formats:
         - html

@@ -80,10 +80,17 @@ export const readPage = async (req: Request, res: Response): Promise<void> => {
 
   try {
     const browser = await puppeteer.launch({ 
-      ignoreDefaultArgs: ["--enable-automation"], 
-      headless: true, 
-      pipe: true ,
-      args: ['--no-sandbox', '--disable-setuid-sandbox', '--disable-dev-shm-usage']
+      ignoreDefaultArgs: ["--enable-automation"],
+      headless: true,  
+      executablePath: "/usr/bin/chromium",  // 明确指定 Chromium 路径
+      pipe: true,
+      args: [
+        '--no-sandbox',
+        '--disable-setuid-sandbox',
+        '--disable-dev-shm-usage',
+        '--disable-gpu',
+       // '--single-process' 
+      ]
     });
     const page = await browser.newPage();
 
