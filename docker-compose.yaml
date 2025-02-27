@@ -94,13 +94,10 @@ services:
 
   nodeapp:
     container_name: main
-    build: .
+    build:
+      context: . 
     ports:
       - "3000:3000"
-    env_file:
-      - .env
-    #volumes:
-      #- .:/app
     networks:
       - searxng
     depends_on:
@@ -110,6 +107,8 @@ services:
       options:
         max-size: "1m"
         max-file: "1"
+    volumes:
+      - /dev/shm:/dev/shm
     deploy:
         resources:
           limits:

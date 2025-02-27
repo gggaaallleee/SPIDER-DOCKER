@@ -1,26 +1,59 @@
-FROM node:20.10.0
+FROM node:20.10.0-slim
+# 推荐使用 slim 镜像减少体积
+
 WORKDIR /app
 
-# 破坏缓存的构建参数
-ARG CACHEBUST=1
+# 安装 Chrome 运行依赖
+RUN apt-get update && apt-get install -y \
+    ca-certificates \
+    fonts-liberation \
+    libasound2 \
+    libatk-bridge2.0-0 \
+    libatk1.0-0 \
+    libc6 \
+    libcairo2 \
+    libcups2 \
+    libdbus-1-3 \
+    libexpat1 \
+    libfontconfig1 \
+    libgbm1 \
+    libgcc1 \
+    libglib2.0-0 \
+    libgtk-3-0 \
+    libnspr4 \
+    libnss3 \
+    libpango-1.0-0 \
+    libpangocairo-1.0-0 \
+    libstdc++6 \
+    libx11-6 \
+    libx11-xcb1 \
+    libxcb1 \
+    libxcomposite1 \
+    libxcursor1 \
+    libxdamage1 \
+    libxext6 \
+    libxfixes3 \
+    libxi6 \
+    libxrandr2 \
+    libxrender1 \
+    libxss1 \
+    libxtst6 \
+    lsb-release \
+    wget \
+    xdg-utils \
+    # 安装 Chromium
+    chromium \
+    # 清理缓存
+    && rm -rf /var/lib/apt/lists/*
+    
+# 安装中文字体
+RUN apt-get update && apt-get install -y fonts-wqy-microhei && fc-cache -f -v
 
-# 清空工作目录（可能冗余，可移除）
-RUN rm -rf /app/*
+COPY SPIDER/. .
 
-# 克隆最新代码（浅克隆加速）
-RUN git clone --branch main --depth 1 \
-    https://github.com/gggaaallleee/SPIDER.git  /app/SPIDER
+RUN test -f package.json || (echo "package.json missing" && exit 1)
+RUN test -f .env || (echo ".env file missing in SPIDER directory" && exit 1)
 
-# 移动文件（建议直接克隆到/app）
-RUN mv /app/SPIDER/* /app/ && rm -rf /app/SPIDER
-
-# 调试步骤（可选）
-RUN ls -la /app
-
-# 验证必要文件存在
-RUN test -f /app/package.json || (echo "package.json missing" && exit 1)
-
-COPY .env .env
 RUN npm install && npm run build
 
 EXPOSE 3000
