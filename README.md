@@ -4,14 +4,14 @@
 ## 代码版部署
 0. 按照 https://github.com/searxng/searxng-docker 的方式处理docker
 1. 参考SPIDER文件夹下的.env.example，添加.env文件
-2. 进入SPIDER文件夹进行npm install
+2. 进入SPIDER文件夹进行pnpm install
 3. 回到根目录，运行docker compose up -d
 
 ## 代码版开发
 1. 将docker-compose.yml中与SPIDER相关的部分注释掉（nodeapp）
 2. .env文件中的URL参照注释修改
 3. 注释掉启动puppteer部分里面指定浏览器地址的代码
-4. npm run dev
+4. pnpm run dev
 
 
 ## 测试样例：
